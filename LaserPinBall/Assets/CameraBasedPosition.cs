@@ -27,7 +27,8 @@ public class CameraBasedPosition : MonoBehaviour {
         
         Vector3 leftPosition = Cam.ScreenToWorldPoint(new Vector3(width * 0.9f, height/2, Cam.transform.position.y));
         Vector3 rightPosition = Cam.ScreenToWorldPoint(new Vector3(width * 0.1f, height/2, Cam.transform.position.y));
-
+        leftPosition.y = 0.5f;
+        rightPosition.y = 0.5f;
         leftPlayer.transform.position = leftPosition;
         rightPlayer.transform.position = rightPosition;
         
