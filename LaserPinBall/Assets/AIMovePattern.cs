@@ -1,53 +1,62 @@
 using System;
-using System.Collections;
 using DG.Tweening;
 using Unity.Mathematics;
 using UnityEngine;
-using Random = UnityEngine.Random;
+using UnityEngine.UIElements;
 
 public class AIMovePattern : MonoBehaviour {
 
-    //Declare random angle and hit it with correct transform point
-    private AIStates currentState;
-    private AIStates AIState {
-        get { return currentState; }
-        set {
-            StopAllCoroutines();
-            currentState = value;
-            switch (currentState) {
-                case AIStates.WaitingTurn:
-                    //StartCoroutine(Idle());
-                    break;
-
-                case AIStates.CatchBall:
-                    StartCoroutine(Turn());
-                    break;
-
-            }
-        }
-    }
-
-    private IEnumerator Start() {
-        while (true) {
-            Debug.Log(Camera.main.WorldToScreenPoint(transform.position).y);
-            float screenPosition = math.remap(0, Camera.main.pixelHeight, -1, 1, Camera.main.WorldToScreenPoint(transform.position).y);
-            print(screenPosition);
-            if (screenPosition == 0) screenPosition = Random.Range(-1,1);
-
-            transform.DOMove(transform.position + transform.forward * screenPosition, 1f);
-            AIState = AIStates.WaitingTurn;
-            yield return new WaitForSeconds(.5f);
-        }
+    public float playerSpeed ;
+    public float returnOriginSpeed ;
+    private Ball ball;
+    private Rigidbody ball_rigidbody;
+    public Transform leftPlayer, rightPlayer;
+    private Vector3 startPosL, startPosR;
+    public bool isLeftPlayerTurn;
+    private void Awake() {
+        ball = FindObjectOfType<Ball>();
+        ball_rigidbody = ball.GetComponent<Rigidbody>();
+        startPosL = leftPlayer.position;
+        startPosR = rightPlayer.position;
     }
     private void Update() {
-
+        RaycastHit hit = ball.hitInfo;
+        isLeftPlayerTurn = ball_rigidbody.velocity.x > 0;
+        if (isLeftPlayerTurn) {
+            MoveObjectwAddforce(leftPlayer, hit.point, playerSpeed);
+            MoveObjectwAddforce(rightPlayer, startPosR, returnOriginSpeed);
+        }
+        else {
+            MoveObjectwAddforce(rightPlayer, hit.point, playerSpeed);
+            MoveObjectwAddforce(leftPlayer, startPosL, returnOriginSpeed);
+        }
     }
-    private IEnumerator Turn() {
-        yield break;
-    }
-}
 
-public enum AIStates {
-    WaitingTurn,
-    CatchBall,
+
+    void MoveObjectwAddforce(Transform player, Vector3 returnPoint, float speed) {
+        if (player.transform.position.z > returnPoint.z) {
+            if(Mathf.Abs(player.transform.position.z - returnPoint.z) < .6f) return;
+            //player.transform.Translate(Vector3.back * Time.deltaTime *speed);
+            player.GetComponent<Rigidbody>().velocity = Vector3.back * Time.deltaTime * speed;
+            //player.GetComponent<Rigidbody>().AddForce(Vector3.back * speed);
+        }
+        else {
+            if(Mathf.Abs(player.transform.position.z - returnPoint.z) < .6f) return;
+            player.GetComponent<Rigidbody>().velocity = Vector3.forward * Time.deltaTime * speed;
+            //player.GetComponent<Rigidbody>().AddForce(Vector3.forward * speed);
+        }
+    }
+
+    void ReturnCenter(Transform player, Vector3 returnPoint, float speed) {
+        if (player.transform.position.z > returnPoint.z) {
+            //player.transform.Translate(Vector3.back * Time.deltaTime *speed);
+            //player.GetComponent<Rigidbody>().velocity = Vector3.back * Time.deltaTime * speed;
+            player.GetComponent<Rigidbody>().AddForce(Vector3.back * speed * Time.deltaTime);
+        }
+        else {
+            //player.GetComponent<Rigidbody>().velocity = Vector3.forward * Time.deltaTime * speed;
+            player.GetComponent<Rigidbody>().AddForce(Vector3.forward * speed * Time.deltaTime);
+        }
+    }
+
 }
