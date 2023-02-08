@@ -11,7 +11,6 @@ public class SoundManager : MonoBehaviour
         if (Instance==null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -34,4 +33,8 @@ public class SoundManager : MonoBehaviour
     {
         _musicSource.mute = !_musicSource.mute;
     }
+    public void Change(AudioClip clip) {
+        _musicSource.clip = clip;
+    }
+    
 }

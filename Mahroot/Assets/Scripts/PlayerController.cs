@@ -1,4 +1,6 @@
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
     private Transform _cam;
@@ -12,7 +14,14 @@ public class PlayerController : MonoBehaviour {
     private bool _isPlayerAwayFromDoor;
     private TrainDoorOpeningAnimation _trainDoorOpeningAnimation;
     private GateOpening _gateOpening;
+   [SerializeField] private AudioSource _musicSource;
+   [SerializeField] private AudioClip clip;
+   [SerializeField] private LayerMask layer;
+
+   public GameObject lava;
+   
     private void Start() {
+        _musicSource.mute = false;
         _controller = gameObject.GetComponent<CharacterController>();
         _cam = Camera.main.transform;
         Cursor.visible = false;
@@ -21,17 +30,24 @@ public class PlayerController : MonoBehaviour {
     }
     
     
+    
     void Update() {
         Movement();
-        
+        if(Physics.Raycast(transform.position,-transform.up,out RaycastHit hit,1,layer)) {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+        }
         
         if(!_isPlayerAwayFromTrain && transform.position.x > 10) {
             _trainDoorOpeningAnimation.IsDoorOpen(false);
+            var player = FindObjectOfType<PlayerController>();
+            player.transform.parent = null;
             _isPlayerAwayFromTrain = true;
         }
         
         if(!_isPlayerAwayFromDoor && transform.position.x > 30) {
             _gateOpening.ActivateDoor(false);
+            SoundManager.Instance.Change(clip);
+            _musicSource.Play();
             _isPlayerAwayFromDoor = true;
         }
         

@@ -29,6 +29,8 @@ public class Police : MonoBehaviour {
         agent.destination = points[2].position;
         yield return new WaitForSeconds(12f);
         animator.SetBool("button", true);
+        AudioClip clip = FindObjectOfType<TrainDoorOpeningAnimation>().doorOpeningSound;
+        SoundManager.Instance.PlaySound(clip);
         _trainDoorOpeningAnimation.IsDoorOpen(true);
         yield return new WaitForSeconds(4f);
         agent.destination = points[0].position;

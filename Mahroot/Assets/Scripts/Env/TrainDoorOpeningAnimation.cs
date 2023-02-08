@@ -15,12 +15,4 @@ public class TrainDoorOpeningAnimation : MonoBehaviour {
         _animator.SetBool("open", state);
     }
     
-    private void Update() {
-        if(Input.GetKeyDown(KeyCode.Q)) {
-            IsDoorOpen(true);
-        }
-        if(Input.GetKeyDown(KeyCode.E)) {
-            IsDoorOpen(false);
-        }
-    }
 }
