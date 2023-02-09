@@ -5,6 +5,8 @@ using UnityEngine.Serialization;
 public class Player : MonoBehaviour, IKitchenObjectParent {
     public static Player Instance;
 
+    public event EventHandler OnPickedSomething;
+
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float turnSpeed = 5f;
     [SerializeField] private LayerMask countersLayerMask;
@@ -121,6 +123,9 @@ public class Player : MonoBehaviour, IKitchenObjectParent {
 
     public void SetKitchenObject(KitchenObject kitchenObject) {
         _kitchenObject = kitchenObject;
+        if (kitchenObject != null) {
+            OnPickedSomething?.Invoke(this, EventArgs.Empty);
+        }
     }
 
     public KitchenObject GetKitchenObject() {
