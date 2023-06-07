@@ -1,4 +1,4 @@
-Shader "Unlit/Shader1"
+Shader "Unlit/VertexOffset"
 {
     Properties
     {
@@ -6,21 +6,19 @@ Shader "Unlit/Shader1"
         _ColorB ("ColorB",Color) = (1,1,1,1)
         _ColorStart ("Color Start",Range(0,1)) = 1
         _ColorEnd ("Color End",Range(0,1)) = 0
+        _WaveAmp ("Wave Amplitude",Range(0,0.2)) = 0
     }
     SubShader
     {
         Tags
         {
-            "RenderType"="Transparent"  // tag to inform the render pipeline of what this is pp reasons
-            "Queue"="Transparent"       // changes render order
+            "RenderType"="Opaque"  // tag to inform the render pipeline of what this is pp reasons
+            //"Queue"="Geometry"       // changes render order
         }
 
         Pass
         {
-            Cull off    
-            ZWrite off
-            ZTest LEqual
-            Blend One One //additive
+            // Blend One One //additive
             //Blend DstColor Zero //multiply
 
 
@@ -38,6 +36,7 @@ Shader "Unlit/Shader1"
             float4 _ColorB;
             float _ColorStart;
             float _ColorEnd;
+            float _WaveAmp;
 
             struct MeshData
             {
@@ -53,9 +52,21 @@ Shader "Unlit/Shader1"
                 float3 normal : TEXCOORD1; // just index
             };
 
+            float GetWave(float2 uv)
+            {
+                 float2 uvsCentered =uv*2 -1;
+
+                float radialDst = length(uvsCentered);
+                 float wave = cos((radialDst - _Time.y * 0.1) * TAU * 5) * 0.5 + 0.5;
+                wave *= 1-radialDst;
+                return wave;
+            }
             Interpolators vert(MeshData v)
             {
                 Interpolators o;
+                //float wave = cos((v.uv.y - _Time.y * 0.1) * TAU * 5);
+                //v.vertex.y = wave * _WaveAmp;
+                v.vertex.y = GetWave(v.uv) * _WaveAmp;
                 o.vertex = UnityObjectToClipPos(v.vertex);
                 o.normal = UnityObjectToWorldNormal(v.normals);
                 o.uv = v.uv;//(v.uv + _Offset) * _Scale;
@@ -67,6 +78,7 @@ Shader "Unlit/Shader1"
                 return (v - a) / (b - a);
             }
 
+            
             fixed4 frag(Interpolators i) : SV_Target
             {
                 //triangle wave
@@ -74,17 +86,20 @@ Shader "Unlit/Shader1"
 
                 // float t = cos(i.uv.x * TAU * 2)*0.5+0.5;
                 // return t;
-                //  _Time.y = seconds 
-                float xOffset = cos(i.uv.x * TAU * 8) * 0.01;
-                float t = cos((i.uv.y + xOffset + _Time.y * -0.1) * TAU * 5) * 0.5 + 0.5;
-                t *= 1 - i.uv.y;
+                //  _Time.y = seconds
+
+               
+                
+               // return float4(radialDst.xxx,1);
+                return GetWave(i.uv);
+               
                 float topBottomRemover = (abs(i.normal.y) < 0.999);
-                float waves = t * topBottomRemover;
+                //float waves = wave * topBottomRemover;
                 // return waves;
 
                 float4 gradient = lerp(_ColorA,_ColorB,i.uv.y);
 
-                return gradient *waves;
+                //return gradient *waves;
 
 
 
