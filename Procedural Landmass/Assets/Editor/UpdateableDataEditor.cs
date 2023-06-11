@@ -1,11 +1,11 @@
 using UnityEditor;
 using UnityEngine;
-[CustomEditor(typeof(UpdateableData),true)]
+[CustomEditor(typeof(UpdatableData),true)]
 public class UpdateableDataEditor : Editor
 {
     public override void OnInspectorGUI() {
         base.OnInspectorGUI();
-        UpdateableData data = (UpdateableData)target;
+        UpdatableData data = (UpdatableData)target;
         if(GUILayout.Button("Update")) {
             data.NotifyOfUpdatedValues();
             EditorUtility.SetDirty(target);
